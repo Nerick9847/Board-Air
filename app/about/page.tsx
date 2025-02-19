@@ -12,10 +12,10 @@ const HeroSection = () => (
       </div>
       <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
          <h1 className="text-6xl font-bold mb-6">
-            Transforming Urban Landscapes
+            Transforming Traditional Billboard System
          </h1>
          <p className="text-xl">
-            For over two decades, we've been revolutionizing outdoor advertising
+            We will revolutionizing billboard booking
             through innovation and creativity.
          </p>
       </div>
@@ -37,21 +37,22 @@ const MissionSection = () => (
             <div>
                <h2 className="text-4xl font-bold mb-6">Our Mission</h2>
                <p className="text-xl text-gray-600 mb-8">
-                  We believe in the power of visual communication to inspire and
-                  connect. Our mission is to provide innovative outdoor
-                  advertising solutions that create lasting impressions and
-                  deliver measurable results.
+                  At Board Air, our mission is to bridge the gap between billboard owners and advertisers in Nepal,
+                  creating a seamless and efficient booking experience. We provide billboard owners with a transparent and 
+                  easy-to-manage platform to showcase their advertising spaces, while enabling advertisers to access prime 
+                  digital billboard placements with ease. Our goal is to empower both parties with a reliable system that 
+                  ensures maximum visibility, efficiency, and growth in the fast-paced world of outdoor advertising.
                </p>
                <div className="grid grid-cols-2 gap-8">
                   <div>
                      <h3 className="text-3xl font-bold text-blue-600 mb-2">
-                        2K+
+                        9
                      </h3>
                      <p className="text-gray-600">Billboard Locations</p>
                   </div>
                   <div>
                      <h3 className="text-3xl font-bold text-blue-600 mb-2">
-                        500+
+                        50+
                      </h3>
                      <p className="text-gray-600">Happy Clients</p>
                   </div>
@@ -84,7 +85,7 @@ const ValuesSection = () => (
                {
                   title: "Impact",
                   description:
-                     "Creating meaningful connections between brands and audiences through strategic placement and compelling design.",
+                     "We prioritize building strong, mutually beneficial relationships between billboard owners and advertisers.",
                },
             ].map((value, index) => (
                <div key={index} className="bg-white p-8 rounded-lg shadow-lg">

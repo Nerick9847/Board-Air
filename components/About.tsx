@@ -10,22 +10,17 @@ export default function About() {
                </span> */}
 
                <h2 className="text-5xl lg:text-8xl uppercase font-bold mb-6  font-vanguard">
-                  We Are <span className="text-[#de3636]">ADSPOT NEPAL</span>
+                  We Are <span className="text-[#de3636]">Board Air</span>
                </h2>
             </div>
 
             <div className="space-y-6">
                <p className="font-light leading-relaxed">
-                  Experience the pulsating energy of Club Turtle, the ultimate
-                  nightlife destination in the heart of Thamel, Kathmandu. With
-                  a vibrant atmosphere that invites you to dance, dine, and
-                  indulge, Club Turtle is where unforgettable memories are made.
-                  Enjoy eclectic music, tantalizing cuisine, and a welcoming
-                  ambiance that celebrates diversity and connection. Whether
-                  you're here to party until dawn or unwind with friends, Club
-                  Turtle embodies the spirit of celebration and excitement,
-                  ensuring every night is a spectacular adventure. Join us and
-                  let the night ignite your passions!
+                  With a user-friendly interface, you can explore available advertising spots, view detailed location information, 
+                  and select the perfect billboard for your campaign. Once you've chosen a spot, easily upload your ad's photo or video 
+                  to showcase your brand's message. Our platform features a convenient calendar to help you choose your advertising dates,
+                  along with automated invoice generation and a secure payment system. Whether you're a small business or a large enterprise, 
+                  Board Air provides transparency, efficiency, and ease in your advertising journey.
                </p>
              
             </div>

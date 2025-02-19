@@ -244,10 +244,10 @@ const ContactPage = () => {
                            <div>
                               <h3 className="font-semibold">Visit Us</h3>
                               <p className="text-gray-600">
-                                 123 Billboard Street
+                                 Ward 8
                               </p>
                               <p className="text-gray-600">
-                                 New York, NY 10001
+                                 Kirtipur, Kathmandu
                               </p>
                            </div>
                         </div>
@@ -260,8 +260,8 @@ const ContactPage = () => {
                            <Phone className="h-6 w-6 text-blue-600" />
                            <div>
                               <h3 className="font-semibold">Call Us</h3>
-                              <p className="text-gray-600">(555) 123-4567</p>
-                              <p className="text-gray-600">Mon-Fri, 9am-6pm</p>
+                              <p className="text-gray-600">(977) 9847361166</p>
+                              <p className="text-gray-600">Mon-Fri, 10am-4pm</p>
                            </div>
                         </div>
                      </CardContent>
@@ -291,10 +291,10 @@ const ContactPage = () => {
                            <div>
                               <h3 className="font-semibold">Business Hours</h3>
                               <p className="text-gray-600">
-                                 Monday - Friday: 9am - 6pm
+                                 Monday - Friday: 10am - 4pm
                               </p>
                               <p className="text-gray-600">
-                                 Saturday: 10am - 4pm
+                                 Saturday: 10am - 1pm
                               </p>
                            </div>
                         </div>

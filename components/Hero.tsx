@@ -11,20 +11,20 @@ export default function Hero() {
 
          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
             <span className="text-sm uppercase tracking-widest mb-4">
-               clubturtle
+               Board Air
             </span>
 
-            <h1 className="text-5xl md:text-7xl lg:text-8xl mb-6 uppercase font-bold font-vanguard">
-               Experience the Thrill,
+            <h1 className="text-5xl md:text-7xl lg:text-7xl mb-6 uppercase font-bold font-vanguard">
+               Take Your Ads
                <br />
-               Embrace the Chill
+               To New Height
             </h1>
 
             <p className="text-sm md:text-base max-w-xl mx-auto font-light opacity-80">
-               Experience the pulsating energy of Club Turtle, the ultimate
-               nightlife destination in the heart of Thamel, Kathmandu. With a
-               vibrant atmosphere that invites you to dance, dine, and indulge,
-               Club Turtle is where unforgettable memories are made.
+               Welcome to Board Air, your go-to platform for effortless billboard booking.
+               Discover and reserve outdoor advertising spaces across Nepal, 
+               showcase your brand with impactful visuals, and take your advertising to new 
+               heights with just few clicks!
             </p>
          </div>
       </section>

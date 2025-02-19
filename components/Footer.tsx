@@ -9,17 +9,18 @@ const Footer = () => {
          <div className="flex flex-col gap-6">
             <Link href="/" className="inline-block">
                <img
-                  src="/royallogo.svg"
-                  alt="niwas solutions logo"
+                  src=""
+                  alt="board air logo"
                   className="w-[150px] max-w-full"
                />
             </Link>
             <p className="text-[white] leading-relaxed m-0">
-               At Royal Cafe Station, we believe that great food and cherished
-               moments go hand in hand. Nestled in the vibrant heart of
-               Kathmandu, our open family restaurant is a place where people of
-               all ages come together to enjoy delicious meals,
+               At Board Air, we connect advertisers with billboard owners, providing 
+               a seamless platform to book advertising spaces across Nepal. We make it 
+               easy for businesses to find the right spots and reach their audience effectively, 
+               while helping billboard owners maximize their potential.
             </p>
+            <br></br>© 2025 Board Air. All rights reserved.
          </div>
 
          {/* Useful Links Section */}
@@ -44,7 +45,7 @@ const Footer = () => {
          {/* Popular Holidays Section */}
          <div className="flex flex-col gap-6">
             <h4 className="text-5xl font-vanguard uppercase text-[#d3be92] m-0">
-               Popular Foods
+               Contact Us
             </h4>
             <ul className="flex flex-col gap-4 p-0 m-0 list-none w-full">
                {[
