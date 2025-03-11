@@ -108,17 +108,17 @@ const TeamSection = () => (
          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {[
                {
-                  name: "Sarah Johnson",
+                  name: "Nerick",
                   role: "Chief Executive Officer",
                   image: "/api/placeholder/400/400",
                },
                {
-                  name: "Michael Chen",
+                  name: "Nerick",
                   role: "Chief Technology Officer",
                   image: "/api/placeholder/400/400",
                },
                {
-                  name: "Emma Williams",
+                  name: "Nerick",
                   role: "Creative Director",
                   image: "/api/placeholder/400/400",
                },

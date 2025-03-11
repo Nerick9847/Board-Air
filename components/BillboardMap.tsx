@@ -1,10 +1,10 @@
-// app/components/BillboardMap.tsx
 "use client";
 
 import { useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import "leaflet/dist/leaflet.css";
@@ -26,7 +26,7 @@ const billboardData: Billboard[] = [
    {
       id: 1,
       location: "Tripureshwor",
-      position: [27.6944, 85.3065] as LatLngExpression,
+      position: [27.6944, 85.3065],
       price: 50000,
       owner: "Nepal Advertising Ltd",
       contact: "+977-1-4444444",
@@ -35,7 +35,7 @@ const billboardData: Billboard[] = [
    {
       id: 2,
       location: "Sundhara",
-      position: [27.7017, 85.3125] as LatLngExpression,
+      position: [27.7017, 85.3125],
       price: 65000,
       owner: "City Media Group",
       contact: "+977-1-5555555",
@@ -44,7 +44,7 @@ const billboardData: Billboard[] = [
    {
       id: 3,
       location: "Kalanki",
-      position: [27.6931, 85.2828] as LatLngExpression,
+      position: [27.6931, 85.2828],
       price: 45000,
       owner: "Metro Billboards",
       contact: "+977-1-6666666",
@@ -53,7 +53,7 @@ const billboardData: Billboard[] = [
    {
       id: 4,
       location: "Kritipur",
-      position: [27.6747, 85.2778] as LatLngExpression,
+      position: [27.6747, 85.2778],
       price: 40000,
       owner: "Valley Advertising",
       contact: "+977-1-7777777",
@@ -62,7 +62,7 @@ const billboardData: Billboard[] = [
    {
       id: 5,
       location: "Baneshwor",
-      position: [27.691, 85.343] as LatLngExpression,
+      position: [27.691, 85.343],
       price: 55000,
       owner: "Prime Outdoor Media",
       contact: "+977-1-8888888",
@@ -71,7 +71,7 @@ const billboardData: Billboard[] = [
    {
       id: 6,
       location: "Durbarmarg",
-      position: [27.7127, 85.3206] as LatLngExpression,
+      position: [27.7127, 85.3206],
       price: 75000,
       owner: "Royal Media Solutions",
       contact: "+977-1-9999999",
@@ -79,12 +79,22 @@ const billboardData: Billboard[] = [
    },
 ];
 
+// Custom hook to control map view
+const MapController = ({ position }: { position: LatLngExpression }) => {
+   const map = useMap();
+   map.setView(position, 15, { animate: true });
+   return null;
+};
+
 const BillboardMap = () => {
    const [selectedBillboard, setSelectedBillboard] = useState<Billboard | null>(
       null
    );
+   const [searchTerm, setSearchTerm] = useState("");
+   const [mapCenter, setMapCenter] = useState<LatLngExpression>([
+      27.7017, 85.3125,
+   ]);
 
-   // Fix default icon issue in react-leaflet
    const customIcon = new Icon({
       iconUrl:
          "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
@@ -96,15 +106,37 @@ const BillboardMap = () => {
       shadowSize: [41, 41],
    });
 
-   const center: LatLngExpression = [27.7017, 85.3125];
+   const handleSearch = () => {
+      const billboard = billboardData.find(
+         (b) => b.location.toLowerCase() === searchTerm.toLowerCase()
+      );
+      if (billboard) {
+         setMapCenter(billboard.position);
+         setSelectedBillboard(billboard);
+      }
+   };
 
    return (
       <Card className="w-full max-w-6xl mx-auto my-8">
          <CardContent className="p-6">
+            {/* Search Bar */}
+            <div className="flex items-center gap-4 mb-4">
+               <Input
+                  type="text"
+                  placeholder="Search location..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+               />
+               <Button onClick={handleSearch} className="bg-red-600 hover:bg-red-700">
+                  Search
+               </Button>
+            </div>
+
             <div className="h-[600px] relative">
                <MapContainer
-                  center={center}
-                  zoom={13}
+                  center={mapCenter}
+                  zoom={11}
                   scrollWheelZoom={false}
                   style={{ height: "100%", width: "100%" }}
                   className="rounded-lg"
@@ -113,6 +145,7 @@ const BillboardMap = () => {
                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
+                  <MapController position={mapCenter} />
                   {billboardData.map((billboard) => (
                      <Marker
                         key={billboard.id}
