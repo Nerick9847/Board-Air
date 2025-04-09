@@ -62,7 +62,7 @@ const BillboardCard = () => {
         <CardContent className="p-6 relative">
           {/* Name & Location */}
           <div className="mb-4">
-            <h2 className="text-xl font-semibold text-gray-800 mb-1.5">Baneshwor LED Billboard</h2>
+           <Link href="/service/details"> <h2 className="text-xl font-semibold text-gray-800 mb-1.5">Baneshwor LED Billboard</h2></Link>
             <div className="flex items-center text-gray-500 text-sm">
               <MapPin className="w-3.5 h-3.5 mr-1.5" />
               <span>Baneshwor, Kathmandu, Nepal</span>

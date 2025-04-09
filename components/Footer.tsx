@@ -6,12 +6,12 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <footer className="w-full min-h-full bg-black text-white px-6 md:px-12 py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-8">
+    <footer className="w-full min-h-full bg-black text-white px-6 md:px-12 py-16 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-12 md:gap-8">
       {/* Brand Section */}
       <div className="flex flex-col gap-6">
         <Link href="/" className="inline-block">
           <div className="text-2xl font-bold text-white">
-            <span className="text-[#d3be92]">BOARD</span> AIR
+          <span className="text-red-600 text-3xl font-bold">BOARD</span> <span className="text-3xl">AIR</span>
           </div>
         </Link>
         <p className="text-white leading-relaxed m-0">
@@ -25,9 +25,8 @@ const Footer = () => {
 
       {/* Sitemap Section */}
       <div className="flex flex-col gap-6">
-        <h4 className="text-3xl md:text-4xl uppercase font-bold m-0 text-[#d3be92]">
-          Sitemap
-        </h4>
+        <h4 className="text-3xl md:text-4xl  font-bold m-0 text-white ">
+            Navigation        </h4>
         <ul className="flex flex-col gap-4 p-0 m-0 list-none w-full">
           {[
             { name: "Home", icon: <Home size={16} /> },
@@ -38,7 +37,7 @@ const Footer = () => {
             <li key={link.name} className="w-full">
               <Link
                 href="/"
-                className="text-white no-underline flex items-center gap-2 hover:text-[#d3be92] transition-colors duration-300"
+                className="text-white no-underline flex items-center gap-2 hover:text-[#d39292] transition-colors duration-300"
               >
                 {link.icon}
                 <span>{link.name}</span>
@@ -50,15 +49,14 @@ const Footer = () => {
 
       {/* Contact Us Section */}
       <div className="flex flex-col gap-6">
-        <h4 className="text-3xl md:text-4xl uppercase font-bold text-[#d3be92] m-0">
-          Contact Us
-        </h4>
+        <h4 className="text-3xl md:text-4xl  font-bold text-white m-0">
+            Social Media</h4>
         <ul className="flex flex-col gap-4 p-0 m-0 list-none w-full">
           <li className="w-full">
             <Link 
               href="https://instagram.com" 
               target="_blank" 
-              className="text-white no-underline flex items-center gap-3 hover:text-[#d3be92] transition-colors duration-300"
+              className="text-white no-underline flex items-center gap-3 hover:text-[#d39292] transition-colors duration-300"
             >
               <Instagram size={20} className="text-white" />
               <span>Instagram</span>
@@ -68,7 +66,7 @@ const Footer = () => {
             <Link 
               href="https://facebook.com" 
               target="_blank" 
-              className="text-white no-underline flex items-center gap-3 hover:text-[#d3be92] transition-colors duration-300"
+              className="text-white no-underline flex items-center gap-3 hover:text-[#d39292] transition-colors duration-300"
             >
               <Facebook size={20} className="text-white" />
               <span>Facebook</span>
@@ -78,7 +76,7 @@ const Footer = () => {
             <Link 
               href="https://linkedin.com" 
               target="_blank" 
-              className="text-white no-underline flex items-center gap-3 hover:text-[#d3be92] transition-colors duration-300"
+              className="text-white no-underline flex items-center gap-3 hover:text-[#d39292] transition-colors duration-300"
             >
               <Linkedin size={20} className="text-white" />
               <span>LinkedIn</span>
@@ -87,10 +85,56 @@ const Footer = () => {
           <li className="w-full">
             <Link 
               href="mailto:contact@boardair.com" 
-              className="text-white no-underline flex items-center gap-3 hover:text-[#d3be92] transition-colors duration-300"
+              className="text-white no-underline flex items-center gap-3 hover:text-[#d39292] transition-colors duration-300"
             >
               <Mail size={20} className="text-white" />
               <span>Email Us</span>
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        <h4 className="text-3xl md:text-4xl  font-bold text-white  m-0">
+            Useful Links        </h4>
+        <ul className="flex flex-col gap-4 p-0 m-0 list-none w-full">
+          <li className="w-full">
+            <Link 
+              href="https://instagram.com" 
+              target="_blank" 
+              className="text-white no-underline flex items-center gap-3 hover:text-[#d39292] transition-colors duration-300"
+            >
+             
+              <span>Terms & Conditions</span>
+            </Link>
+          </li>
+          <li className="w-full">
+            <Link 
+              href="https://facebook.com" 
+              target="_blank" 
+              className="text-white no-underline flex items-center gap-3 hover:text-[#d39292] transition-colors duration-300"
+            >
+              
+              <span>Payment Policies</span>
+            </Link>
+          </li>
+          <li className="w-full">
+            <Link 
+              href="https://linkedin.com" 
+              target="_blank" 
+              className="text-white no-underline flex items-center gap-3 hover:text-[#d39292] transition-colors duration-300"
+            >
+             
+              <span>FAQ</span>
+            </Link>
+          </li>
+          <li className="w-full">
+            <Link 
+              href="mailto:contact@boardair.com" 
+              className="text-white no-underline flex items-center gap-3 hover:text-[#d39292] transition-colors duration-300"
+            >
+              
+              <span>Contact Us</span>
             </Link>
           </li>
         </ul>

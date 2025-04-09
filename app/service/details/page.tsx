@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { MapPin, DollarSign, Maximize, Info, Calendar, ChevronLeft, ChevronRight, Users } from 'lucide-react';
-
+import Link from 'next/link'
 // Billboard data
 const billboardData = {
   id: 1,
@@ -145,8 +145,8 @@ const BillboardDetailsPage = () => {
       <div className="flex justify-center mt-8 mb-12">
         <button className="px-8 py-4 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all flex items-center justify-center shadow-sm hover:shadow-md">
           <Calendar className="mr-3" size={18} />
-          Book This Billboard
-        </button>
+          <Link href="/service/billboard">           Book This Billboard
+          </Link>        </button>
       </div>
     </div>
   );
