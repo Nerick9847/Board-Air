@@ -184,9 +184,11 @@ const AuthModal = () => {
          </DialogTrigger>
          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-               <DialogTitle>Welcome</DialogTitle>
-               <DialogDescription>
-                  Sign in to your account or create a new one
+               <DialogTitle className="text-center text-2xl font-bold">
+                  Board<span className="text-red-600">AIR</span>
+               </DialogTitle>
+               <DialogDescription className="text-center text-gray-500 dark:text-gray-400">
+                  Your journey begins here
                </DialogDescription>
             </DialogHeader>
 
@@ -222,7 +224,7 @@ const AuthModal = () => {
                      </div>
                      <Button
                         type="submit"
-                        className="w-full"
+                        className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md transition-colors duration-200"
                         disabled={loginMutation.isPending}
                      >
                         {loginMutation.isPending ? "Signing In..." : "Sign In"}
@@ -278,7 +280,7 @@ const AuthModal = () => {
                      </div>
                      <Button
                         type="submit"
-                        className="w-full"
+                        className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-md transition-colors duration-200"
                         disabled={registerMutation.isPending}
                      >
                         {registerMutation.isPending

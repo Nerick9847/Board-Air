@@ -28,10 +28,10 @@ export const useRegister = () => {
          passwordConfirm: string;
          name?: string;
       }) => {
-         // First, register in PocketBase
+         // Register in PocketBase
          const newUser = await registerUser(userData);
 
-         // Then sign in
+         // sign in
          const result = await signIn("credentials", {
             redirect: false,
             email: userData.email,
