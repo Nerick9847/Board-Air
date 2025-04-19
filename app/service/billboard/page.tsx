@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronRight, Upload, Clock, ImageIcon, FilmIcon } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface FormData {
    firstName: string;
@@ -33,7 +34,8 @@ const BillboardBookingForm = () => {
       termsAccepted: false,
       photoVideoAcknowledged: false,
    });
-
+   const searchParams = useSearchParams();
+   const id = searchParams.get("id");
    const [preview, setPreview] = useState<string | null>(null);
    const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -57,7 +59,7 @@ const BillboardBookingForm = () => {
             <div className="relative aspect-[16/9] rounded-xl overflow-hidden shadow-xl">
                {/* City skyline silhouette overlay */}
                <div className="absolute bottom-0 left-0 right-0 h-16 z-10 bg-gradient-to-t from-red/80 to-transparent pointer-events-none" />
-               
+
                {/* Preview Area */}
                {preview ? (
                   <div className="absolute inset-0">
@@ -113,10 +115,14 @@ const BillboardBookingForm = () => {
             {/* Red header banner */}
             <div className="bg-red-600 p-6 text-white relative">
                <div className="absolute top-0 right-0 w-32 h-32 bg-red-500 rounded-full -translate-y-1/2 translate-x-1/2 opacity-40"></div>
-               <h2 className="text-3xl font-bold relative z-10">Book Your Billboard</h2>
-               <p className="mt-1 text-red-100 relative z-10">Complete the form below to showcase your content</p>
+               <h2 className="text-3xl font-bold relative z-10">
+                  Book Your Billboard
+               </h2>
+               <p className="mt-1 text-red-100 relative z-10">
+                  Complete the form below to showcase your content
+               </p>
             </div>
-            
+
             <div className="p-8">
                {/* Billboard Preview Section */}
                <div className="mb-10">
@@ -124,7 +130,9 @@ const BillboardBookingForm = () => {
                      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
                         <span className="text-white font-bold">1</span>
                      </div>
-                     <h3 className="text-xl font-bold text-gray-800">Preview Your Billboard</h3>
+                     <h3 className="text-xl font-bold text-gray-800">
+                        Preview Your Billboard
+                     </h3>
                   </div>
                   <div className="border-l-4 border-red-600 pl-6 ml-4">
                      <BillboardPreview />
@@ -136,19 +144,21 @@ const BillboardBookingForm = () => {
                      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
                         <span className="text-white font-bold">2</span>
                      </div>
-                     <h3 className="text-xl font-bold text-gray-800">Choose Media Type</h3>
+                     <h3 className="text-xl font-bold text-gray-800">
+                        Choose Media Type
+                     </h3>
                   </div>
-                  
+
                   <div className="border-l-4 border-red-600 pl-6 ml-4">
                      <RadioGroup
                         value={formData.mediaType}
                         onValueChange={handleMediaTypeChange}
                         className="grid grid-cols-2 gap-4"
                      >
-                        <div 
+                        <div
                            className={`cursor-pointer rounded-xl p-6 border-2 transition-all ${
-                              formData.mediaType === "photo" 
-                                 ? "border-red-500 bg-red-50" 
+                              formData.mediaType === "photo"
+                                 ? "border-red-500 bg-red-50"
                                  : "border-gray-200 hover:border-red-300"
                            }`}
                            onClick={() => handleMediaTypeChange("photo")}
@@ -157,16 +167,18 @@ const BillboardBookingForm = () => {
                               <ImageIcon className="h-6 w-6 text-red-600" />
                               <RadioGroupItem value="photo" id="photo" />
                            </div>
-                           <h4 className="font-bold text-lg text-gray-800 mb-1">Photo</h4>
+                           <h4 className="font-bold text-lg text-gray-800 mb-1">
+                              Photo
+                           </h4>
                            <p className="text-sm text-gray-600">
                               Static image for your billboard display
                            </p>
                         </div>
-                        
-                        <div 
+
+                        <div
                            className={`cursor-pointer rounded-xl p-6 border-2 transition-all ${
-                              formData.mediaType === "video" 
-                                 ? "border-red-500 bg-red-50" 
+                              formData.mediaType === "video"
+                                 ? "border-red-500 bg-red-50"
                                  : "border-gray-200 hover:border-red-300"
                            }`}
                            onClick={() => handleMediaTypeChange("video")}
@@ -175,13 +187,15 @@ const BillboardBookingForm = () => {
                               <FilmIcon className="h-6 w-6 text-red-600" />
                               <RadioGroupItem value="video" id="video" />
                            </div>
-                           <h4 className="font-bold text-lg text-gray-800 mb-1">Video</h4>
+                           <h4 className="font-bold text-lg text-gray-800 mb-1">
+                              Video
+                           </h4>
                            <p className="text-sm text-gray-600">
                               30-second video for dynamic presentation
                            </p>
                         </div>
                      </RadioGroup>
-                     
+
                      <div className="mt-6 bg-gray-50 p-5 rounded-xl border border-gray-200">
                         <h4 className="font-bold text-gray-700 flex items-center mb-3">
                            <Clock className="h-4 w-4 mr-2 text-red-600" />
@@ -200,7 +214,10 @@ const BillboardBookingForm = () => {
                                     <div className="mr-2 h-5 w-5 flex items-center justify-center">
                                        <div className="h-1.5 w-1.5 bg-red-600 rounded-full"></div>
                                     </div>
-                                    <span>Landscape orientation recommended (16:9 ratio)</span>
+                                    <span>
+                                       Landscape orientation recommended (16:9
+                                       ratio)
+                                    </span>
                                  </li>
                               </>
                            ) : (
@@ -223,7 +240,10 @@ const BillboardBookingForm = () => {
                               <div className="mr-2 h-5 w-5 flex items-center justify-center">
                                  <div className="h-1.5 w-1.5 bg-red-600 rounded-full"></div>
                               </div>
-                              <span>Content should be high resolution for best display</span>
+                              <span>
+                                 Content should be high resolution for best
+                                 display
+                              </span>
                            </li>
                         </ul>
                      </div>
@@ -235,18 +255,22 @@ const BillboardBookingForm = () => {
                      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
                         <span className="text-white font-bold">3</span>
                      </div>
-                     <h3 className="text-xl font-bold text-gray-800">Upload Your {formData.mediaType}</h3>
+                     <h3 className="text-xl font-bold text-gray-800">
+                        Upload Your {formData.mediaType}
+                     </h3>
                   </div>
-                  
+
                   <div className="border-l-4 border-red-600 pl-6 ml-4">
                      <div className="border-3 border-dashed border-red-300 rounded-xl p-8 text-center bg-red-50 hover:bg-red-100 transition-colors relative overflow-hidden">
                         <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-red-200 rounded-full opacity-50"></div>
                         <div className="absolute -left-6 -top-6 w-16 h-16 bg-red-200 rounded-full opacity-30"></div>
-                        
+
                         <input
                            type="file"
                            accept={
-                              formData.mediaType === "photo" ? "image/*" : "video/*"
+                              formData.mediaType === "photo"
+                                 ? "image/*"
+                                 : "video/*"
                            }
                            onChange={handleFileChange}
                            className="hidden"
@@ -263,8 +287,8 @@ const BillboardBookingForm = () => {
                               Drop {formData.mediaType} here or click to browse
                            </span>
                            <span className="text-red-600/70 mt-2 text-sm max-w-md mx-auto">
-                              {formData.mediaType === "photo" 
-                                 ? "Select a high-quality image to maximize impact" 
+                              {formData.mediaType === "photo"
+                                 ? "Select a high-quality image to maximize impact"
                                  : "Choose a captivating video clip (max 30 seconds)"}
                            </span>
                         </Label>
@@ -277,29 +301,47 @@ const BillboardBookingForm = () => {
                      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
                         <span className="text-white font-bold">4</span>
                      </div>
-                     <h3 className="text-xl font-bold text-gray-800">Your Information</h3>
+                     <h3 className="text-xl font-bold text-gray-800">
+                        Your Information
+                     </h3>
                   </div>
-                  
+
                   <div className="border-l-4 border-red-600 pl-6 ml-4">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                           <Label htmlFor="firstName" className="text-gray-700 font-medium">First Name</Label>
+                           <Label
+                              htmlFor="firstName"
+                              className="text-gray-700 font-medium"
+                           >
+                              First Name
+                           </Label>
                            <Input
                               id="firstName"
                               value={formData.firstName}
                               onChange={(e) =>
-                                 setFormData({ ...formData, firstName: e.target.value })
+                                 setFormData({
+                                    ...formData,
+                                    firstName: e.target.value,
+                                 })
                               }
                               className="mt-1 border-gray-300 focus:border-red-500 focus:ring focus:ring-red-200"
                            />
                         </div>
                         <div>
-                           <Label htmlFor="lastName" className="text-gray-700 font-medium">Last Name</Label>
+                           <Label
+                              htmlFor="lastName"
+                              className="text-gray-700 font-medium"
+                           >
+                              Last Name
+                           </Label>
                            <Input
                               id="lastName"
                               value={formData.lastName}
                               onChange={(e) =>
-                                 setFormData({ ...formData, lastName: e.target.value })
+                                 setFormData({
+                                    ...formData,
+                                    lastName: e.target.value,
+                                 })
                               }
                               className="mt-1 border-gray-300 focus:border-red-500 focus:ring focus:ring-red-200"
                            />
@@ -308,24 +350,40 @@ const BillboardBookingForm = () => {
 
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                           <Label htmlFor="email" className="text-gray-700 font-medium">Email Address</Label>
+                           <Label
+                              htmlFor="email"
+                              className="text-gray-700 font-medium"
+                           >
+                              Email Address
+                           </Label>
                            <Input
                               id="email"
                               type="email"
                               value={formData.email}
                               onChange={(e) =>
-                                 setFormData({ ...formData, email: e.target.value })
+                                 setFormData({
+                                    ...formData,
+                                    email: e.target.value,
+                                 })
                               }
                               className="mt-1 border-gray-300 focus:border-red-500 focus:ring focus:ring-red-200"
                            />
                         </div>
                         <div>
-                           <Label htmlFor="phone" className="text-gray-700 font-medium">Phone Number</Label>
+                           <Label
+                              htmlFor="phone"
+                              className="text-gray-700 font-medium"
+                           >
+                              Phone Number
+                           </Label>
                            <Input
                               id="phone"
                               value={formData.phone}
                               onChange={(e) =>
-                                 setFormData({ ...formData, phone: e.target.value })
+                                 setFormData({
+                                    ...formData,
+                                    phone: e.target.value,
+                                 })
                               }
                               className="mt-1 border-gray-300 focus:border-red-500 focus:ring focus:ring-red-200"
                            />
@@ -333,12 +391,20 @@ const BillboardBookingForm = () => {
                      </div>
 
                      <div className="mb-2">
-                        <Label htmlFor="brandName" className="text-gray-700 font-medium">Brand or Company Name</Label>
+                        <Label
+                           htmlFor="brandName"
+                           className="text-gray-700 font-medium"
+                        >
+                           Brand or Company Name
+                        </Label>
                         <Input
                            id="brandName"
                            value={formData.brandName}
                            onChange={(e) =>
-                              setFormData({ ...formData, brandName: e.target.value })
+                              setFormData({
+                                 ...formData,
+                                 brandName: e.target.value,
+                              })
                            }
                            className="mt-1 border-gray-300 focus:border-red-500 focus:ring focus:ring-red-200"
                            placeholder="Enter the name to be displayed with your content"
@@ -352,9 +418,11 @@ const BillboardBookingForm = () => {
                      <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center mr-3">
                         <span className="text-white font-bold">5</span>
                      </div>
-                     <h3 className="text-xl font-bold text-gray-800">Terms & Agreements</h3>
+                     <h3 className="text-xl font-bold text-gray-800">
+                        Terms & Agreements
+                     </h3>
                   </div>
-                  
+
                   <div className="border-l-4 border-red-600 pl-6 ml-4">
                      <div className="bg-gray-50 p-5 rounded-xl border border-gray-200">
                         <div className="flex items-start space-x-3 mb-4">
@@ -370,11 +438,15 @@ const BillboardBookingForm = () => {
                               className="mt-1 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
                            />
                            <div>
-                              <Label htmlFor="terms" className="text-gray-800 font-medium">
+                              <Label
+                                 htmlFor="terms"
+                                 className="text-gray-800 font-medium"
+                              >
                                  Terms & Conditions
                               </Label>
                               <p className="text-gray-500 text-sm mt-1">
-                                 I have read and agree to the billboard service terms and conditions
+                                 I have read and agree to the billboard service
+                                 terms and conditions
                               </p>
                            </div>
                         </div>
@@ -392,12 +464,17 @@ const BillboardBookingForm = () => {
                               className="mt-1 data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
                            />
                            <div>
-                              <Label htmlFor="photo-video-terms" className="text-gray-800 font-medium">
+                              <Label
+                                 htmlFor="photo-video-terms"
+                                 className="text-gray-800 font-medium"
+                              >
                                  Content Compliance
                               </Label>
                               <p className="text-gray-500 text-sm mt-1">
-                                 I confirm my {formData.mediaType} complies with content guidelines and does not
-                                 contain unauthorized brands, logos, or inappropriate material
+                                 I confirm my {formData.mediaType} complies with
+                                 content guidelines and does not contain
+                                 unauthorized brands, logos, or inappropriate
+                                 material
                               </p>
                            </div>
                         </div>
@@ -406,10 +483,13 @@ const BillboardBookingForm = () => {
                </div>
 
                <div className="flex justify-between pt-4 border-t border-gray-200">
-                  <Button variant="outline" className="border-gray-300 hover:bg-gray-50 text-gray-700">
+                  <Button
+                     variant="outline"
+                     className="border-gray-300 hover:bg-gray-50 text-gray-700"
+                  >
                      Previous Step
                   </Button>
-                  <Link href="/service/billboard/date">
+                  <Link href={`/service/billboard/date?id=${id}`}>
                      <Button className="bg-red-600 hover:bg-red-700 text-white px-6">
                         Select Display Date
                         <ChevronRight className="ml-2 h-4 w-4" />

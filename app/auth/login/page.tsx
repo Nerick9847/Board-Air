@@ -1,133 +1,388 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Loader2 } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import PocketBase from "pocketbase";
+import bcrypt from "bcryptjs";
+
 import { Button } from "@/components/ui/button";
+import {
+   Card,
+   CardContent,
+   CardDescription,
+   CardFooter,
+   CardHeader,
+   CardTitle,
+} from "@/components/ui/card";
+import {
+   Form,
+   FormControl,
+   FormField,
+   FormItem,
+   FormLabel,
+   FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, User, Building } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 
-export default function LoginPage() {
-  const [role, setRole] = useState("billboard_owner");
-  const [credentials, setCredentials] = useState({ username: "", password: "" });
-  const [isHovered, setIsHovered] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const router = useRouter();
+// Initialize PocketBase
+const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials((prev) => ({ ...prev, [name]: value }));
-  };
+// Schema for both login and signup
+const authSchema = z
+   .object({
+      email: z
+         .string()
+         .email({ message: "Please enter a valid email address" }),
+      password: z
+         .string()
+         .min(6, { message: "Password must be at least 6 characters" }),
+      name: z.string().optional(),
+      businessName: z.string().optional(),
+      contactNumber: z.string().optional(),
+      confirmPassword: z.string().optional(),
+   })
+   .refine(
+      (data) => {
+         // Only validate confirmPassword during signup
+         if (data.confirmPassword && data.password !== data.confirmPassword) {
+            return false;
+         }
+         return true;
+      },
+      {
+         message: "Passwords do not match",
+         path: ["confirmPassword"],
+      }
+   );
 
-  const roles = [
-    { id: "billboard_owner", name: "Billboard Owner", icon: Building },
-    { id: "advertiser", name: "Advertiser", icon: User },
-  ];
+type AuthFormValues = z.infer<typeof authSchema>;
 
-  const getRoleLabel = () => roles.find((r) => r.id === role)?.name || "Choose Role";
+export default function BillboardOwnerAuthPage() {
+   const { toast } = useToast();
+   const queryClient = useQueryClient();
 
-  const getRoleIcon = () => {
-    const Icon = roles.find((r) => r.id === role)?.icon;
-    return Icon ? <Icon size={18} /> : null;
-  };
+   const router = useRouter();
+   const searchParams = useSearchParams();
+   const callbackUrl = searchParams.get("callbackUrl") || "/owner/bookings";
+   const [isLoading, setIsLoading] = useState<boolean>(false);
+   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-sky-50">
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Card className="w-[450px] p-10 shadow-xl rounded-xl bg-white border-t-4 border-blue-600">
-          {/* Logo */}
-          <div className="flex justify-center mb-6">
-            <div className="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center">
-              <span className="text-blue-800 font-bold text-xl">LOGO</span>
+   // Create mutation for billboard owners
+   const createBillboardOwnerMutation = useMutation({
+      mutationFn: async (data: {
+         email: string;
+         password: string;
+         passwordConfirm: string;
+         name: string;
+         business_name?: string;
+         contact_number?: string;
+      }) => {
+         //remove passwordConfirm
+         const { passwordConfirm, ...rest } = data;
+
+         // Hash the password before saving
+         const hashedPassword = await bcrypt.hash(rest.password, 10);
+
+         return await pb.collection("billboard_owners").create({
+            ...rest,
+            password: hashedPassword, // Save the hashed password
+         });
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["billboard-owners"] });
+         toast({
+            title: "Account created",
+            description:
+               "Your billboard owner account has been created successfully.",
+         });
+         setAuthMode("login"); // Switch to login mode after successful signup
+      },
+      onError: (error) => {
+         console.error("Error creating billboard owner:", error);
+         toast({
+            title: "Error",
+            description: "Failed to create account. Please try again.",
+            variant: "destructive",
+         });
+      },
+   });
+
+   // Form for both login and signup
+   const form = useForm<AuthFormValues>({
+      resolver: zodResolver(authSchema),
+      defaultValues: {
+         email: "",
+         password: "",
+         name: "",
+         businessName: "",
+         contactNumber: "",
+         confirmPassword: "",
+      },
+   });
+
+   async function onSubmit(data: AuthFormValues) {
+      setIsLoading(true);
+
+      try {
+         if (authMode === "signup") {
+            //remove confirmPassword
+            const { confirmPassword, ...rest } = data;
+            createBillboardOwnerMutation.mutate({
+               email: rest.email,
+               password: rest.password,
+               passwordConfirm: rest.password, // Use password for confirmation
+               name: rest.name || "",
+               business_name: rest.businessName,
+               contact_number: rest.contactNumber,
+            });
+            setIsLoading(false);
+            return;
+         }
+
+         // For login, use the consolidated auth endpoint with specific provider ID
+         const result = await signIn("billboard-owner-credentials", {
+            email: data.email,
+            password: data.password,
+            isSignup: "false",
+            redirect: false,
+            callbackUrl,
+         });
+
+         if (result?.error) {
+            toast({
+               title: "Login failed",
+               description:
+                  result.error || "Please check your credentials and try again",
+               variant: "destructive",
+            });
+            setIsLoading(false);
+            return;
+         }
+         if (result?.ok) {
+            router.push(callbackUrl);
+         } else {
+            toast({
+               title: "Login failed",
+               description:
+                  result?.error ||
+                  "Please check your credentials and try again",
+               variant: "destructive",
+            });
+         }
+      } catch (error) {
+         console.error(`${authMode} error:`, error);
+         toast({
+            title: "Something went wrong",
+            description: "Please try again later",
+            variant: "destructive",
+         });
+      } finally {
+         setIsLoading(false);
+      }
+   }
+
+   // Rest of your component remains the same
+   return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+         <div className="w-full max-w-md">
+            <div className="text-center mb-6">
+               <h1 className="text-3xl font-bold">Billboard Owner Portal</h1>
+               <p className="text-gray-600">
+                  Sign in to your account or create a new one
+               </p>
             </div>
-          </div>
 
-          <motion.h2 className="text-2xl font-bold text-center mb-8 text-blue-800" initial={{ scale: 0.9 }} animate={{ scale: 1 }} transition={{ duration: 0.3 }}>
-            Welcome Back
-          </motion.h2>
+            <Tabs
+               defaultValue="login"
+               className="w-full"
+               value={authMode}
+               onValueChange={(value) =>
+                  setAuthMode(value as "login" | "signup")
+               }
+            >
+               <TabsList className="grid w-full grid-cols-2 mb-8">
+                  <TabsTrigger value="login">Login</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+               </TabsList>
 
-          <div className="space-y-6">
-            {/* Role Selection */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Select Role</Label>
-              <div className="relative">
-                <motion.button
-                  className={`w-full bg-gray-50 border border-gray-200 rounded-md px-4 py-2.5 text-left flex items-center justify-between ${
-                    isDropdownOpen ? "ring-2 ring-blue-600 border-blue-600" : "hover:border-blue-400"
-                  } transition-all duration-200`}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                >
-                  <div className="flex items-center gap-2 text-gray-700">
-                    {getRoleIcon()}
-                    <span>{getRoleLabel()}</span>
-                  </div>
-                  <motion.div initial={false} animate={{ rotate: isDropdownOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                    <ChevronDown size={18} className="text-gray-500" />
-                  </motion.div>
-                </motion.button>
+               <Card>
+                  <CardHeader>
+                     <CardTitle>
+                        {authMode === "login" ? "Login" : "Create an Account"}
+                     </CardTitle>
+                     <CardDescription>
+                        {authMode === "login"
+                           ? "Enter your credentials to access your billboard owner account"
+                           : "Enter your details to create a new billboard owner account"}
+                     </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                     <Form {...form}>
+                        <form
+                           onSubmit={form.handleSubmit(onSubmit)}
+                           className="space-y-4"
+                        >
+                           {/* Name field - only shown during signup */}
+                           {authMode === "signup" && (
+                              <FormField
+                                 control={form.control}
+                                 name="name"
+                                 render={({ field }) => (
+                                    <FormItem>
+                                       <FormLabel>Name</FormLabel>
+                                       <FormControl>
+                                          <Input
+                                             placeholder="John Doe"
+                                             {...field}
+                                          />
+                                       </FormControl>
+                                       <FormMessage />
+                                    </FormItem>
+                                 )}
+                              />
+                           )}
 
-                <AnimatePresence>
-                  {isDropdownOpen && (
-                    <motion.div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg py-1 overflow-hidden" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.15 }}>
-                      {roles.map((roleOption) => {
-                        const Icon = roleOption.icon;
-                        return (
-                          <motion.div
-                            key={roleOption.id}
-                            className={`px-4 py-2 flex items-center gap-2 cursor-pointer ${
-                              role === roleOption.id ? "bg-blue-50 text-blue-700" : "hover:bg-gray-50"
-                            }`}
-                            whileHover={{ backgroundColor: role === roleOption.id ? "#eff6ff" : "#f9fafb" }}
-                            onClick={() => {
-                              setRole(roleOption.id);
-                              setIsDropdownOpen(false);
-                            }}
-                          >
-                            <Icon size={18} className={role === roleOption.id ? "text-blue-600" : "text-gray-500"} />
-                            <span>{roleOption.name}</span>
-                            {role === roleOption.id && <motion.div className="ml-auto w-2 h-2 rounded-full bg-blue-600" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ duration: 0.2 }} />}
-                          </motion.div>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
+                           {/* Business Name field - only shown during signup */}
+                           {authMode === "signup" && (
+                              <FormField
+                                 control={form.control}
+                                 name="businessName"
+                                 render={({ field }) => (
+                                    <FormItem>
+                                       <FormLabel>Business Name</FormLabel>
+                                       <FormControl>
+                                          <Input
+                                             placeholder="Acme Billboards"
+                                             {...field}
+                                          />
+                                       </FormControl>
+                                       <FormMessage />
+                                    </FormItem>
+                                 )}
+                              />
+                           )}
 
-            {/* Username */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Username</Label>
-              <Input type="text" name="username" placeholder="Enter your username" className="bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 py-2" value={credentials.username} onChange={handleInputChange} />
-            </div>
+                           {/* Contact Number field - only shown during signup */}
+                           {authMode === "signup" && (
+                              <FormField
+                                 control={form.control}
+                                 name="contactNumber"
+                                 render={({ field }) => (
+                                    <FormItem>
+                                       <FormLabel>Contact Number</FormLabel>
+                                       <FormControl>
+                                          <Input
+                                             placeholder="+1 (555) 123-4567"
+                                             {...field}
+                                          />
+                                       </FormControl>
+                                       <FormMessage />
+                                    </FormItem>
+                                 )}
+                              />
+                           )}
 
-            {/* Password */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-700">Password</Label>
-              <Input type="password" name="password" placeholder="Enter your password" className="bg-gray-50 border-gray-200 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all duration-200 py-2" value={credentials.password} onChange={handleInputChange} />
-            </div>
+                           <FormField
+                              control={form.control}
+                              name="email"
+                              render={({ field }) => (
+                                 <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                       <Input
+                                          placeholder="name@example.com"
+                                          type="email"
+                                          {...field}
+                                       />
+                                    </FormControl>
+                                    <FormMessage />
+                                 </FormItem>
+                              )}
+                           />
 
-            {/* Login Button */}
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="mt-8">
-              <Button className="w-full bg-blue-700 hover:bg-blue-800 text-white font-medium py-3 rounded-lg shadow-md transition-all duration-300 text-base" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
-                {isHovered ? "Let's Go!" : "Login"}
-              </Button>
-            </motion.div>
+                           <FormField
+                              control={form.control}
+                              name="password"
+                              render={({ field }) => (
+                                 <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
+                                       <Input
+                                          type="password"
+                                          placeholder="••••••••"
+                                          {...field}
+                                       />
+                                    </FormControl>
+                                    <FormMessage />
+                                 </FormItem>
+                              )}
+                           />
+                           {/* Confirm Password field - only shown during signup */}
+                           {authMode === "signup" && (
+                              <FormField
+                                 control={form.control}
+                                 name="confirmPassword"
+                                 render={({ field }) => (
+                                    <FormItem>
+                                       <FormLabel>Confirm Password</FormLabel>
+                                       <FormControl>
+                                          <Input
+                                             type="password"
+                                             placeholder="••••••••"
+                                             {...field}
+                                          />
+                                       </FormControl>
+                                       <FormMessage />
+                                    </FormItem>
+                                 )}
+                              />
+                           )}
 
-            {/* Register Link */}
-            <div className="text-center pt-4">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
-                <motion.span className="text-blue-700 font-medium cursor-pointer hover:text-blue-900 hover:underline transition-colors duration-200" whileHover={{ scale: 1.05 }} onClick={() => router.push("/registration")}>
-                  Register
-                </motion.span>
-              </p>
-            </div>
-          </div>
-        </Card>
-      </motion.div>
-    </div>
-  );
+                           <Button
+                              type="submit"
+                              className="w-full"
+                              disabled={isLoading}
+                           >
+                              {isLoading ? (
+                                 <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    {authMode === "login"
+                                       ? "Logging in..."
+                                       : "Creating account..."}
+                                 </>
+                              ) : authMode === "login" ? (
+                                 "Login"
+                              ) : (
+                                 "Create Account"
+                              )}
+                           </Button>
+                        </form>
+                     </Form>
+                  </CardContent>
+                  <CardFooter className="flex justify-center">
+                     <Button
+                        variant="link"
+                        onClick={() =>
+                           setAuthMode(
+                              authMode === "login" ? "signup" : "login"
+                           )
+                        }
+                     >
+                        {authMode === "login"
+                           ? "Don't have an account? Sign up"
+                           : "Already have an account? Login"}
+                     </Button>
+                  </CardFooter>
+               </Card>
+            </Tabs>
+         </div>
+      </div>
+   );
 }
