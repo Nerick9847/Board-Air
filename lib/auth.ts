@@ -301,7 +301,7 @@ export const authOptions: NextAuthOptions = {
                   return null;
                }
 
-               // Verify the password
+               // password verification
                const passwordMatch = await bcrypt.compare(
                   credentials.password,
                   record.password
