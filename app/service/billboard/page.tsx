@@ -630,6 +630,8 @@ const BillboardBookingForm = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const price = searchParams.get("price_per_month");
+
   const id = searchParams.get("id") || "default";
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -703,7 +705,7 @@ const BillboardBookingForm = () => {
             file: base64File
           }));
           
-          router.push(`/service/billboard/date?id=${id}`);
+          router.push(`/service/billboard/date?id=${id}&price_per_month=${price}`);
         };
       } 
       // For video, use IndexedDB
@@ -748,7 +750,7 @@ const BillboardBookingForm = () => {
     return (
       <div className="w-full max-w-md mx-auto">
         <div className="relative aspect-[16/9] rounded-xl overflow-hidden shadow-xl">
-          <div className="absolute bottom-0 left-0 right-0 h-16 z-10 bg-gradient-to-t from-red-600/80 to-transparent pointer-events-none" />
+          <div className="absolute " />
           {formData.filePreview ? (
             <div className="absolute inset-0">
               {isVideo ? (
@@ -769,9 +771,9 @@ const BillboardBookingForm = () => {
               )}
             </div>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 via-red-100 to-red-200">
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-red-50 via-red-100 to-red-100">
               <div className="text-center p-6">
-                <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Upload className="w-10 h-10 text-white" />
                 </div>
                 <h3 className="text-red-700 font-bold text-xl mb-2">

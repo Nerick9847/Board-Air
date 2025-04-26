@@ -240,7 +240,7 @@ const ContactPage = () => {
                   <Card>
                      <CardContent className="pt-6">
                         <div className="flex items-center space-x-4">
-                           <MapPin className="h-6 w-6 text-blue-600" />
+                           <MapPin className="h-6 w-6 text-red-500" />
                            <div>
                               <h3 className="font-semibold">Visit Us</h3>
                               <p className="text-gray-600">
@@ -257,7 +257,7 @@ const ContactPage = () => {
                   <Card>
                      <CardContent className="pt-6">
                         <div className="flex items-center space-x-4">
-                           <Phone className="h-6 w-6 text-blue-600" />
+                           <Phone className="h-6 w-6 text-red-500" />
                            <div>
                               <h3 className="font-semibold">Call Us</h3>
                               <p className="text-gray-600">(977) 9847361166</p>
@@ -270,7 +270,7 @@ const ContactPage = () => {
                   <Card>
                      <CardContent className="pt-6">
                         <div className="flex items-center space-x-4">
-                           <Mail className="h-6 w-6 text-blue-600" />
+                           <Mail className="h-6 w-6 text-red-500" />
                            <div>
                               <h3 className="font-semibold">Email Us</h3>
                               <p className="text-gray-600">
@@ -287,7 +287,7 @@ const ContactPage = () => {
                   <Card>
                      <CardContent className="pt-6">
                         <div className="flex items-center space-x-4">
-                           <Clock className="h-6 w-6 text-blue-600" />
+                           <Clock className="h-6 w-6 text-red-500" />
                            <div>
                               <h3 className="font-semibold">Business Hours</h3>
                               <p className="text-gray-600">

@@ -827,6 +827,8 @@ const DateSelection = ({ onPrevious, onContinue }: DateSelectionProps) => {
   
   const searchParams = useSearchParams();
   const id = searchParams.get("id") || "default";
+     const price = searchParams.get("price_per_month");
+
   const router = useRouter();
   const { mutate: createAdvertisement } = useCreateAdvertisement();
   const { data: session } = useSession();
@@ -892,8 +894,6 @@ if (userEmail) {
     console.warn("User not found in PocketBase or admin auth failed, proceeding as guest");
   }
 }
-
-
       // Prepare the file
       let file;
       
@@ -1079,9 +1079,9 @@ if (userEmail) {
   const calculateTotal = () => {
     const days = calculateNumberOfDays();
     if (days >= 3) {
-      return Math.round(199 * days * 0.9);
+      return Math.round(price * days * 0.9);
     }
-    return 199 * days;
+    return price * days;
   };
 
   const initiatePayment = async () => {
@@ -1343,7 +1343,7 @@ if (userEmail) {
               <div className="bg-white shadow-md rounded-xl p-6 border border-gray-100">
                 <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-100">
                   <div className="text-gray-700">Billboard display rate</div>
-                  <div className="font-bold text-gray-900">$199 per day</div>
+                  <div className="font-bold text-gray-900">{price}</div>
                 </div>
                 
                 {startDate && endDate && (
@@ -1355,13 +1355,13 @@ if (userEmail) {
                     
                     <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-100">
                       <div className="text-gray-700">Subtotal</div>
-                      <div className="font-bold text-gray-900">${199 * calculateNumberOfDays()}</div>
+                      <div className="font-bold text-gray-900">${price * calculateNumberOfDays()}</div>
                     </div>
                     
                     {calculateNumberOfDays() >= 3 && (
                       <div className="flex justify-between items-center mb-3 pb-3 border-b border-gray-100">
                         <div className="text-green-600">Multi-day discount (10%)</div>
-                        <div className="font-bold text-green-600">-${Math.round(199 * calculateNumberOfDays() * 0.1)}</div>
+                        <div className="font-bold text-green-600">-${Math.round(price * calculateNumberOfDays() * 0.1)}</div>
                       </div>
                     )}
                     

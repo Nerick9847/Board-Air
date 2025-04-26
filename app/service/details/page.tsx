@@ -75,7 +75,7 @@ const BillboardDetailsPage = () => {
                               Monthly Price
                            </p>
                            <p className="font-bold text-xl text-gray-900">
-                              NPR {billboard.price_per_month}
+                              $ {billboard.price_per_month}
                            </p>
                         </div>
                      </div>
@@ -88,20 +88,6 @@ const BillboardDetailsPage = () => {
                            <p className="text-sm text-gray-500">Dimensions</p>
                            <p className="font-bold text-xl text-gray-900">
                               {billboard.size}
-                           </p>
-                        </div>
-                     </div>
-
-                     <div className="flex items-center">
-                        <div className="p-3 bg-red-50 rounded-full mr-4">
-                           <Users className="text-red-500" size={22} />
-                        </div>
-                        <div>
-                           <p className="text-sm text-gray-500">
-                              Daily Impressions
-                           </p>
-                           <p className="font-bold text-xl text-gray-900">
-                              {billboard.dailyImpressions}
                            </p>
                         </div>
                      </div>
@@ -123,13 +109,21 @@ const BillboardDetailsPage = () => {
 
          {/* CTA Button */}
          <div className="flex justify-center mt-8 mb-12">
+         <div className="flex justify-center mt-8 mb-12">
             <Link
-               href={`/service/billboard?id=${billboard.id}`}
+               href={{
+                  pathname: "/service/billboard",
+                  query: {
+                     id: billboard.id,
+                     price_per_month: billboard.price_per_month,
+                  },
+               }}
                className="px-8 py-4 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 flex items-center"
             >
                <Calendar className="mr-3" size={18} />
                Book This Billboard
             </Link>
+         </div>
          </div>
       </div>
    );

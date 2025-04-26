@@ -1,41 +1,41 @@
 "use client";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Layout from "@/components/Layout";
-import { Check, X, Calendar, User, Clock, Image as ImageIcon, Building, MapPin } from "lucide-react";
+import { 
+  Calendar, 
+  User, 
+  Clock, 
+  Image as ImageIcon, 
+  Building, 
+  MapPin, 
+  Loader2, 
+  Mail, 
+  Phone, 
+  ExternalLink,
+  X as XIcon // Renamed to XIcon to avoid confusion
+} from "lucide-react";
+import PocketBase from 'pocketbase';
+
+// Initialize PocketBase client
+const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL || 'http://127.0.0.1:8090');
 
 export default function Bookings() {
-  const [bookings, setBookings] = useState([
-    { 
-      id: 1, 
-      advertiser: "John Doe", 
-      company: "Tech Solutions Inc.",
-      bookedDate: "2025-02-10", 
-      airDate: "2025-03-01", 
-      media: "Billboard Ad Campaign.jpg",
-      status: "pending",
-      duration: "30 days",
-      location: "Central Plaza Billboard"
-    },
-    { 
-      id: 2, 
-      advertiser: "Jane Smith", 
-      company: "Fashion Brands Co.",
-      bookedDate: "2025-02-15", 
-      airDate: "2025-03-05", 
-      media: "Spring Collection Launch.mp4",
-      status: "pending",
-      duration: "45 days",
-      location: "Highway Junction Display"
+  const [selectedMedia, setSelectedMedia] = useState(null);
+  
+  // Fetch advertisements data from PocketBase
+  const { data: bookings, isLoading, isError, error } = useQuery({
+    queryKey: ['advertisements'],
+    queryFn: async () => {
+      const records = await pb.collection('advertisements').getList(1, 50, {
+        sort: '-created',
+        expand: 'billboard_id,user_id'
+      });
+      return records.items;
     }
-  ]);
-
-  const handleStatusChange = (id, newStatus) => {
-    setBookings(bookings.map(booking => 
-      booking.id === id ? { ...booking, status: newStatus } : booking
-    ));
-  };
+  });
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -44,6 +44,66 @@ export default function Bookings() {
       day: 'numeric'
     });
   };
+
+  // Calculate duration between start and end dates
+  const calculateDuration = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end - start);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return `${diffDays} days`;
+  };
+
+  // Get media URL from PocketBase
+  const getMediaUrl = (booking) => {
+    if (!booking.media) return null;
+    return pb.getFileUrl(booking, booking.media);
+  };
+
+  // Show media viewer modal
+  const openMediaViewer = (booking) => {
+    const mediaUrl = getMediaUrl(booking);
+    if (mediaUrl) {
+      setSelectedMedia({
+        url: mediaUrl,
+        filename: booking.media,
+        brand: booking.brand
+      });
+    }
+  };
+
+  // Close media viewer modal
+  const closeMediaViewer = () => {
+    setSelectedMedia(null);
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <Layout title="Booking Management">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+            <p className="text-gray-600">Loading bookings...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Show error state
+  if (isError) {
+    return (
+      <Layout title="Booking Management">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="p-6 bg-red-50 text-red-700 rounded-lg max-w-lg mx-auto">
+            <h2 className="text-lg font-semibold mb-2">Error loading bookings</h2>
+            <p>{error?.message || "Something went wrong. Please try again later."}</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Booking Management">
@@ -54,133 +114,176 @@ export default function Bookings() {
             <h1 className="text-4xl font-bold text-gray-900 mb-3">
               Billboard Bookings
             </h1>
-            <div className="flex items-center justify-between">
-              <p className="text-lg text-gray-600">
-                Manage your billboard booking requests
-              </p>
-              <div className="flex gap-4">
-                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm">
-                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Pending</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm">
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Accepted</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm">
-                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                  <span className="text-sm text-gray-600">Declined</span>
-                </div>
-              </div>
-            </div>
+            <p className="text-lg text-gray-600">
+              View all your billboard booking requests
+            </p>
           </div>
 
           {/* Bookings Grid */}
           <div className="grid gap-8">
-            {bookings.map((booking) => (
-              <Card 
-                key={booking.id} 
-                className="bg-white overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="p-8">
-                  {/* Booking Header */}
-                  <div className="flex items-start justify-between mb-8">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2 text-gray-600 mb-2">
-                        <Building size={18} />
-                        <span className="text-2xl font-semibold text-gray-900">
-                          {booking.company}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <User size={16} />
-                        <span>{booking.advertiser}</span>
+            {bookings && bookings.length > 0 ? (
+              bookings.map((booking) => (
+                <Card 
+                  key={booking.id} 
+                  className="bg-white overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="p-8">
+                    {/* Booking Header */}
+                    <div className="flex items-start justify-between mb-8">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-gray-600 mb-2">
+                          <Building size={18} />
+                          <span className="text-2xl font-semibold text-gray-900">
+                            {booking.brand}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <User size={16} />
+                          <span>{booking.first_name} {booking.last_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Mail size={16} />
+                          <span>{booking.email}</span>
+                        </div>
                       </div>
                     </div>
-                    
-                    {booking.status === 'pending' && (
-                      <div className="flex gap-3">
-                        <Button
-                          className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 flex items-center gap-2 rounded-lg transition-colors"
-                          onClick={() => handleStatusChange(booking.id, 'accepted')}
-                        >
-                          <Check size={18} />
-                          Accept
-                        </Button>
-                        <Button
-                          className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 flex items-center gap-2 rounded-lg transition-colors"
-                          onClick={() => handleStatusChange(booking.id, 'declined')}
-                        >
-                          <X size={18} />
-                          Decline
-                        </Button>
-                      </div>
-                    )}
 
-                    {booking.status === 'accepted' && (
-                      <div className="px-4 py-2 rounded-lg bg-green-50 text-green-700 font-medium">
-                        Accepted
+                    {/* Booking Details Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Calendar size={16} />
+                          <span className="text-sm font-medium">Booked Date</span>
+                        </div>
+                        <p className="text-gray-900">{formatDate(booking.created)}</p>
                       </div>
-                    )}
 
-                    {booking.status === 'declined' && (
-                      <div className="px-4 py-2 rounded-lg bg-red-50 text-red-700 font-medium">
-                        Declined
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Clock size={16} />
+                          <span className="text-sm font-medium">Start Date</span>
+                        </div>
+                        <p className="text-gray-900">{formatDate(booking.start_date)}</p>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Booking Details Grid */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Calendar size={16} />
-                        <span className="text-sm font-medium">Booked Date</span>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Clock size={16} />
+                          <span className="text-sm font-medium">End Date</span>
+                        </div>
+                        <p className="text-gray-900">{formatDate(booking.end_date)}</p>
                       </div>
-                      <p className="text-gray-900">{formatDate(booking.bookedDate)}</p>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Clock size={16} />
+                          <span className="text-sm font-medium">Duration</span>
+                        </div>
+                        <p className="text-gray-900">{calculateDuration(booking.start_date, booking.end_date)}</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Phone size={16} />
+                          <span className="text-sm font-medium">Contact</span>
+                        </div>
+                        <p className="text-gray-900">{booking.phone_number}</p>
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Clock size={16} />
-                        <span className="text-sm font-medium">Air Date</span>
+                    {/* Media File Section */}
+                    <div className="mt-8 pt-8 border-t border-gray-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <ImageIcon size={16} />
+                          <span className="text-sm font-medium">Media File</span>
+                        </div>
+                        {booking.media && (
+                          <Button
+                            onClick={() => openMediaViewer(booking)}
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                          >
+                            <ExternalLink size={16} />
+                            View Media
+                          </Button>
+                        )}
                       </div>
-                      <p className="text-gray-900">{formatDate(booking.airDate)}</p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <Clock size={16} />
-                        <span className="text-sm font-medium">Duration</span>
+                      <div className="bg-gray-50 px-4 py-3 rounded-lg">
+                        <p className="text-gray-900">{booking.media || "No media file"}</p>
                       </div>
-                      <p className="text-gray-900">{booking.duration}</p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-gray-600">
-                        <MapPin size={16} />
-                        <span className="text-sm font-medium">Location</span>
-                      </div>
-                      <p className="text-gray-900">{booking.location}</p>
-                    </div>
-                  </div>
-
-                  {/* Media File Section */}
-                  <div className="mt-8 pt-8 border-t border-gray-100">
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <ImageIcon size={16} />
-                      <span className="text-sm font-medium">Media File</span>
-                    </div>
-                    <div className="bg-gray-50 px-4 py-3 rounded-lg">
-                      <p className="text-gray-900">{booking.media}</p>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+                <p className="text-gray-500">No bookings found</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Media Viewer Modal */}
+      {selectedMedia && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="font-semibold text-lg">
+                {selectedMedia.brand} - {selectedMedia.filename}
+              </h3>
+              <Button 
+                onClick={closeMediaViewer}
+                className="p-2 rounded-full hover:bg-gray-100"
+              >
+                <XIcon size={20} />
+              </Button>
+            </div>
+            <div className="p-4 overflow-auto flex-1">
+              {selectedMedia.url && (
+                selectedMedia.filename.match(/\.(jpeg|jpg|png|gif|webp)$/i) ? (
+                  <img 
+                    src={selectedMedia.url} 
+                    alt={selectedMedia.filename}
+                    className="max-w-full mx-auto"
+                  />
+                ) : selectedMedia.filename.match(/\.(mp4|webm|ogg)$/i) ? (
+                  <video 
+                    src={selectedMedia.url} 
+                    controls
+                    className="max-w-full mx-auto"
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="text-center">
+                      <p className="mb-2">File type not previewable</p>
+                      <a 
+                        href={selectedMedia.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline flex items-center justify-center gap-2"
+                      >
+                        <ExternalLink size={16} />
+                        Open file in new tab
+                      </a>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+            <div className="p-4 border-t flex justify-end">
+              <Button
+                onClick={closeMediaViewer}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

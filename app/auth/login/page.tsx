@@ -102,7 +102,7 @@ export default function BillboardOwnerAuthPage() {
             description:
                "Your billboard owner account has been created successfully.",
          });
-         setAuthMode("login"); // Switch to login mode after successful signup
+         setAuthMode("login"); 
       },
       onError: (error) => {
          console.error("Error creating billboard owner:", error);
@@ -132,12 +132,11 @@ export default function BillboardOwnerAuthPage() {
 
       try {
          if (authMode === "signup") {
-            //remove confirmPassword
             const { confirmPassword, ...rest } = data;
             createBillboardOwnerMutation.mutate({
                email: rest.email,
                password: rest.password,
-               passwordConfirm: rest.password, // Use password for confirmation
+               passwordConfirm: rest.password, 
                name: rest.name || "",
                business_name: rest.businessName,
                contact_number: rest.contactNumber,
@@ -188,7 +187,7 @@ export default function BillboardOwnerAuthPage() {
       }
    }
 
-   // Rest of your component remains the same
+ 
    return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
          <div className="w-full max-w-md">
@@ -239,7 +238,7 @@ export default function BillboardOwnerAuthPage() {
                                        <FormLabel>Name</FormLabel>
                                        <FormControl>
                                           <Input
-                                             placeholder="John Doe"
+                                             placeholder="Nerick Shrestha"
                                              {...field}
                                           />
                                        </FormControl>
@@ -259,7 +258,7 @@ export default function BillboardOwnerAuthPage() {
                                        <FormLabel>Business Name</FormLabel>
                                        <FormControl>
                                           <Input
-                                             placeholder="Acme Billboards"
+                                             placeholder="BoardAir"
                                              {...field}
                                           />
                                        </FormControl>
@@ -279,7 +278,7 @@ export default function BillboardOwnerAuthPage() {
                                        <FormLabel>Contact Number</FormLabel>
                                        <FormControl>
                                           <Input
-                                             placeholder="+1 (555) 123-4567"
+                                             placeholder="9847361122"
                                              {...field}
                                           />
                                        </FormControl>
@@ -347,7 +346,7 @@ export default function BillboardOwnerAuthPage() {
 
                            <Button
                               type="submit"
-                              className="w-full"
+                              className="w-full col bg-red-500 text-white"
                               disabled={isLoading}
                            >
                               {isLoading ? (

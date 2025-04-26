@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Layout from "@/components/Layout";
@@ -12,84 +12,137 @@ import {
   DollarSign,
   FileText,
   Search,
-  BuildingIcon
+  BuildingIcon,
+  Loader2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import PocketBase from 'pocketbase';
 
 export default function Transactions() {
-  const [transactions, setTransactions] = useState([
-    { 
-      id: 1, 
-      paymentType: "Credit Card", 
-      amount: 500,
-      date: "2025-02-22", 
-      from: "John Doe",
-      status: "completed",
-      cardLastFour: "4242",
-      company: "Tech Solutions Inc."
-    },
-    { 
-      id: 2, 
-      paymentType: "Bank Transfer", 
-      amount: 750,
-      date: "2025-02-21", 
-      from: "Jane Smith",
-      status: "completed",
-      accountLastFour: "8890",
-      company: "Design Studio Co."
-    },
-    { 
-      id: 3, 
-      paymentType: "Credit Card", 
-      amount: 1200,
-      date: "2025-02-20", 
-      from: "Mike Johnson",
-      status: "completed",
-      cardLastFour: "1234",
-      company: "Marketing Pro LLC"
-    }
-  ]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        // Fetch advertisements along with related user and billboard data
+        const records = await pb.collection('advertisements').getFullList({
+          expand: 'user_id,billboard_id',
+          sort: '-created',
+        });
+        
+        // Transform the data into transaction format
+        const formattedTransactions = records.map(ad => ({
+          id: ad.id,
+          paymentType: ad.payment_method || "Bank Transfer",
+          amount: parseFloat(ad.amount_paid) || 0,
+          date: ad.created,
+          from: `${ad.first_name} ${ad.last_name}`.trim() || 'Unknown',
+          status: "completed",
+          company: ad.brand || 'Unknown Brand',
+          billboardLocation: ad.expand?.billboard_id?.location || 'Unknown Location',
+          duration: `${new Date(ad.start_date).toLocaleDateString()} - ${new Date(ad.end_date).toLocaleDateString()}`,
+          media: ad.media
+        }));
+        
+        setTransactions(formattedTransactions);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
 
   const generateInvoice = (transaction) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let yPosition = margin;
     
-    // Header
+    // Add logo or header
     doc.setFontSize(24);
     doc.setTextColor(44, 62, 80);
-    doc.text("INVOICE", pageWidth / 2, 20, { align: "center" });
-    
+    doc.text("INVOICE", pageWidth / 2, yPosition, { align: "center" });
+    yPosition += 20;
+
     // Company Info
     doc.setFontSize(12);
-    doc.text("Billboard Management System", 20, 40);
-    doc.text(new Date().toLocaleDateString(), pageWidth - 20, 40, { align: "right" });
-    
+    doc.text("Board Air", margin, yPosition);
+    doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, pageWidth - margin, yPosition, { align: "right" });
+    yPosition += 15;
+
+    // Divider
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
     // Customer Info
     doc.setFontSize(14);
-    doc.text("Bill To:", 20, 60);
+    doc.text("Bill To:", margin, yPosition);
+    yPosition += 10;
     doc.setFontSize(12);
-    doc.text(transaction.company, 20, 70);
-    doc.text(transaction.from, 20, 80);
-    
-    // Transaction Details
+    doc.text(transaction.company, margin, yPosition);
+    yPosition += 7;
+    doc.text(transaction.from, margin, yPosition);
+    yPosition += 15;
+
+    // Transaction Details Header
     doc.setFillColor(241, 242, 246);
-    doc.rect(20, 100, pageWidth - 40, 10, "F");
+    doc.rect(margin, yPosition, pageWidth - margin * 2, 10, "F");
     doc.setTextColor(44, 62, 80);
-    doc.text("Transaction Details", 30, 107);
+    doc.setFontSize(12);
+    doc.text("Description", margin + 5, yPosition + 7);
+    doc.text("Amount", pageWidth - margin - 25, yPosition + 7, { align: "right" });
+    yPosition += 15;
+
+    // Transaction Items
+    doc.setFontSize(11);
     
-    doc.text(`Payment Type: ${transaction.paymentType}`, 20, 120);
-    doc.text(`Amount: $${transaction.amount.toLocaleString()}`, 20, 130);
-    doc.text(`Date: ${new Date(transaction.date).toLocaleDateString()}`, 20, 140);
-    doc.text(`Transaction ID: ${transaction.id}`, 20, 150);
+    // Billboard Rental
+    doc.text(`Billboard Advertising - ${transaction.billboardLocation}`, margin + 5, yPosition);
+    doc.text(`$${transaction.amount.toFixed(2)}`, pageWidth - margin - 25, yPosition, { align: "right" });
+    yPosition += 10;
     
+    // Duration
+    doc.text(`Duration: ${transaction.duration}`, margin + 5, yPosition);
+    yPosition += 10;
+    
+    // Payment Method
+    doc.text(`Payment Method: ${transaction.paymentType}`, margin + 5, yPosition);
+    yPosition += 15;
+
+    // Total
+    doc.setFontSize(12);
+    doc.setDrawColor(200, 200, 200);
+    doc.line(pageWidth - margin - 60, yPosition, pageWidth - margin, yPosition);
+    yPosition += 5;
+    doc.text("Total:", pageWidth - margin - 50, yPosition);
+    doc.text(`$${transaction.amount.toFixed(2)}`, pageWidth - margin - 25, yPosition, { align: "right" });
+    yPosition += 15;
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Thank you for your business!", pageWidth / 2, yPosition, { align: "center" });
+    yPosition += 5;
+    doc.text("Want to Air Again? Lets BoardAir", 
+      pageWidth / 2, yPosition, { align: "center" });
+
     doc.save(`invoice_${transaction.id}.pdf`);
   };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
@@ -100,6 +153,25 @@ export default function Transactions() {
       <BuildingIcon className="text-green-500" size={20} />
     );
   };
+
+  const filteredTransactions = transactions.filter(transaction => 
+    transaction.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    transaction.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    transaction.billboardLocation.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <Layout title="Transaction Management">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <Loader2 className="animate-spin text-blue-500" size={24} />
+            <span>Loading transactions...</span>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Transaction Management">
@@ -120,6 +192,8 @@ export default function Transactions() {
                   <Input 
                     placeholder="Search transactions..." 
                     className="pl-10 pr-4 py-2 w-64 bg-white"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
               </div>
@@ -136,7 +210,7 @@ export default function Transactions() {
                 <div>
                   <p className="text-sm text-gray-600">Total Revenue</p>
                   <p className="text-2xl font-bold text-gray-900">
-                    ${transactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString()}
+                    ${transactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </p>
                 </div>
               </div>
@@ -163,7 +237,9 @@ export default function Transactions() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Payment Methods</p>
-                  <p className="text-2xl font-bold text-gray-900">2</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {new Set(transactions.map(t => t.paymentType)).size}
+                  </p>
                 </div>
               </div>
             </Card>
@@ -171,66 +247,74 @@ export default function Transactions() {
 
           {/* Transactions List */}
           <div className="grid gap-6">
-            {transactions.map((transaction) => (
-              <Card 
-                key={transaction.id} 
-                className="bg-white overflow-hidden hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 bg-gray-50 rounded-lg">
-                        <PaymentTypeIcon type={transaction.paymentType} />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {transaction.company}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <User size={14} />
-                          {transaction.from}
+            {filteredTransactions.length === 0 ? (
+              <Card className="p-8 text-center bg-white">
+                <p className="text-gray-500">No transactions found</p>
+              </Card>
+            ) : (
+              filteredTransactions.map((transaction) => (
+                <Card 
+                  key={transaction.id} 
+                  className="bg-white overflow-hidden hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-gray-50 rounded-lg">
+                          <PaymentTypeIcon type={transaction.paymentType} />
                         </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-8">
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-gray-900">
-                          ${transaction.amount.toLocaleString()}
-                        </p>
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <Calendar size={14} />
-                          {formatDate(transaction.date)}
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {transaction.company}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <User size={14} />
+                            {transaction.from}
+                          </div>
                         </div>
                       </div>
                       
-                      <Button
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 flex items-center gap-2"
-                        onClick={() => generateInvoice(transaction)}
-                      >
-                        <Download size={18} />
-                        Invoice
-                      </Button>
+                      <div className="flex items-center gap-8">
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-gray-900">
+                            ${transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </p>
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <Calendar size={14} />
+                            {formatDate(transaction.date)}
+                          </div>
+                        </div>
+                        
+                        <Button
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 flex items-center gap-2"
+                          onClick={() => generateInvoice(transaction)}
+                        >
+                          <Download size={18} />
+                          Invoice
+                        </Button>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-100">
-                    <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Payment Method:</span>
-                        {transaction.paymentType}
-                        {transaction.cardLastFour && ` (**** ${transaction.cardLastFour})`}
-                        {transaction.accountLastFour && ` (**** ${transaction.accountLastFour})`}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">Transaction ID:</span>
-                        #{transaction.id}
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Billboard Location:</span>
+                          {transaction.billboardLocation}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Payment Method:</span>
+                          {transaction.paymentType}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">Transaction ID:</span>
+                          #{transaction.id}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </div>
