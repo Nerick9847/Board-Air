@@ -108,7 +108,7 @@ export type Billboard = {
    rating: number;
    latitude: number;
    longitude: number;
-   image: string; // assume this is a URL or file path from PocketBase
+   image: string; 
 };
 
 export default function Service() {
@@ -142,7 +142,7 @@ export default function Service() {
          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
             <input
                type="text"
-               placeholder="Search by name, location, or price..."
+               placeholder="Search by name"
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
                className="w-full sm:w-1/2 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"

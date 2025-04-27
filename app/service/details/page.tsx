@@ -51,16 +51,12 @@ const BillboardDetailsPage = () => {
 
          {/* Main */}
          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {/* Single Image */}
-            <div className="order-2 md:order-1">
-               <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                  <img
-                     src={billboard.images?.[0]}
-                     alt="Billboard"
-                     className="w-full h-full object-cover"
-                  />
-               </div>
-            </div>
+            {/* image path */}
+            {billboard.image && (
+               <img
+               src={`http://127.0.0.1:8090/api/files/pbc_280385485/5k06d8b70803530/${billboard.image}`}
+               alt={billboard.name}/>
+            )}
 
             {/* Info Box */}
             <div className="order-1 md:order-2">

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Layout from "@/components/Layout";
@@ -22,21 +23,48 @@ export default function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const { data: session } = useSession();
+  const currentOwnerId = session?.user?.id || "";
   const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL);
 
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        // Fetch advertisements along with related user and billboard data
+        if (!currentOwnerId) return;
+        
+        // First get all billboards owned by the current user
+        const ownedBillboards = await pb.collection('billboards').getFullList({
+          filter: `owner_id ~ "${currentOwnerId}"`
+        });
+        
+        // Extract billboard IDs
+        const billboardIds = ownedBillboards.map(b => b.id);
+        
+        // If no billboards, return empty array
+        if (billboardIds.length === 0) {
+          setTransactions([]);
+          return;
+        }
+        
+        // Create filter string for advertisements
+        let filterString = '';
+        if (billboardIds.length === 1) {
+          filterString = `billboard_id = "${billboardIds[0]}"`;
+        } else {
+          filterString = billboardIds.map(id => `billboard_id = "${id}"`).join(' || ');
+        }
+        
+        // Fetch advertisements for owner's billboards
         const records = await pb.collection('advertisements').getFullList({
           expand: 'user_id,billboard_id',
           sort: '-created',
+          filter: filterString
         });
         
         // Transform the data into transaction format
         const formattedTransactions = records.map(ad => ({
           id: ad.id,
-          paymentType: ad.payment_method || "Bank Transfer",
+          paymentType: ad.payment_method || "Stripe",
           amount: parseFloat(ad.amount_paid) || 0,
           date: ad.created,
           from: `${ad.first_name} ${ad.last_name}`.trim() || 'Unknown',
@@ -56,7 +84,7 @@ export default function Transactions() {
     };
 
     fetchTransactions();
-  }, []);
+  }, [currentOwnerId]);
 
   const generateInvoice = (transaction) => {
     const doc = new jsPDF();
@@ -204,8 +232,8 @@ export default function Transactions() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <Card className="p-6 bg-white">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <DollarSign className="text-blue-500" size={24} />
+                <div className="p-3 bg-red-50 rounded-lg">
+                  <DollarSign className="text-red-700" size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total Revenue</p>
@@ -219,7 +247,7 @@ export default function Transactions() {
             <Card className="p-6 bg-white">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-green-50 rounded-lg">
-                  <FileText className="text-green-500" size={24} />
+                  <FileText className="text-green-700" size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total Transactions</p>
@@ -233,7 +261,7 @@ export default function Transactions() {
             <Card className="p-6 bg-white">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-purple-50 rounded-lg">
-                  <CreditCard className="text-purple-500" size={24} />
+                  <CreditCard className="text-purple-800" size={24} />
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Payment Methods</p>
@@ -249,7 +277,11 @@ export default function Transactions() {
           <div className="grid gap-6">
             {filteredTransactions.length === 0 ? (
               <Card className="p-8 text-center bg-white">
-                <p className="text-gray-500">No transactions found</p>
+                <p className="text-gray-500">
+                  {currentOwnerId 
+                    ? "No transactions found for your billboards" 
+                    : "Please sign in to view transactions"}
+                </p>
               </Card>
             ) : (
               filteredTransactions.map((transaction) => (
@@ -286,7 +318,7 @@ export default function Transactions() {
                         </div>
                         
                         <Button
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 flex items-center gap-2"
+                          className="bg-red-500 hover:bg-red-700 text-white px-4 py-2 flex items-center gap-2"
                           onClick={() => generateInvoice(transaction)}
                         >
                           <Download size={18} />
