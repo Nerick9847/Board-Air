@@ -17,9 +17,6 @@ export default function Layout({ title, children }: { title: string; children: R
             <Link href="/owner/transactions" className="block hover:text-blue-400">Transactions</Link>
           </nav>
         </div>
-        <Button className="bg-red-500 hover:bg-red-600 text-white flex items-center justify-center py-2">
-          <LogOut className="mr-2" /> Logout
-        </Button>
       </aside>
 
       {/* Main Content */}

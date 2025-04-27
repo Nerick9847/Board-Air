@@ -204,6 +204,7 @@ const BillboardCard = ({ billboard }: Props) => {
   const [hovered, setHovered] = useState(false);
   const [buttonHovered, setButtonHovered] = useState(false);
   const { data: session, status } = useSession();
+  console.log("this is", billboard)
   
   // Calculate daily price from monthly price
   const dailyPrice = Math.round(billboard.price_per_month / 30);
@@ -218,7 +219,7 @@ const BillboardCard = ({ billboard }: Props) => {
         {/* image path */}
         {billboard.image && (
           <img
-            src={`http://127.0.0.1:8090/api/files/pbc_280385485/5k06d8b70803530/${billboard.image}`}
+            src={`http://127.0.0.1:8090/api/files/pbc_280385485/${billboard.id}/${billboard.image}`}
             alt={billboard.name}
             className={`absolute top-0 w-full h-full object-cover transition-all duration-500 ease-in-out ${
               hovered ? "scale-105 opacity-0" : "scale-100 opacity-100"

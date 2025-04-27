@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { pb } from "@/lib/pocketbase";
+import { useQuery } from "@tanstack/react-query";
 
 interface Billboard {
   id: string;
@@ -22,29 +23,22 @@ const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1494806812796-244fe51b
 const Carousel = () => {
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [slides, setSlides] = useState<Billboard[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchBillboards = async () => {
-      try {
-        const records = await pb.collection('billboards').getFullList({
-          sort: '-created',
-        });
-        setSlides(records);
-      } catch (error) {
-        console.error('Failed to fetch billboards:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBillboards();
-  }, []);
+  // Fetch billboards using React Query
+  const { data: slides = [], isLoading } = useQuery({
+    queryKey: ['billboards'],
+    queryFn: async () => {
+      const records = await pb.collection('billboards').getFullList({
+        sort: '-created',
+      });
+      return records as Billboard[];
+    }
+  });
 
   const length = slides.length;
 
-  useEffect(() => {
+  // Auto-advance slides
+  React.useEffect(() => {
     if (length === 0) return;
     const interval = setInterval(() => {
       nextSlide();
@@ -66,7 +60,7 @@ const Carousel = () => {
     setTimeout(() => setIsTransitioning(false), 500);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="relative w-full h-[600px] flex items-center justify-center">
         <p>Loading billboards...</p>
@@ -114,7 +108,6 @@ const Carousel = () => {
                 )}
               </div>
 
-              {/* Rest of your slide content remains the same */}
               <div className="absolute inset-0 z-20 flex items-center justify-center px-4 md:px-16">
                 <div className="max-w-4xl w-full bg-black/70 p-6 md:p-10 rounded-lg backdrop-blur-sm transform transition-all duration-700 ease-out translate-y-0 opacity-100">
                   <div className="flex flex-col md:flex-row gap-6 items-start">
@@ -131,11 +124,8 @@ const Carousel = () => {
                         {slide.description}
                       </p>
                       <div className="flex gap-4">
-                        <Button className="bg-red-500 hover:bg-red-600 text-white">
-                          <Link href={`/service/billboard/${slide.id}`}>Book Now</Link>
-                        </Button>
-                        <Button variant="outline" className="text-black border-white hover:bg-white/10 hover:text-white">
-                          <Link href={`/service/details/${slide.id}`}>View Details</Link>
+                        <Button className="bg-red-500 hover:bg-red-700 text-white">
+                          <Link href={`/service/details?id=${slide.id}`}>View Details</Link>
                         </Button>
                       </div>
                     </div>
@@ -161,7 +151,6 @@ const Carousel = () => {
         })}
       </div>
 
-      {/* Navigation arrows and dots remain the same */}
       <Button 
         onClick={prevSlide} 
         variant="outline" 

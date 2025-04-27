@@ -54,7 +54,7 @@ const BillboardDetailsPage = () => {
             {/* image path */}
             {billboard.image && (
                <img
-               src={`http://127.0.0.1:8090/api/files/pbc_280385485/5k06d8b70803530/${billboard.image}`}
+               src={`http://127.0.0.1:8090/api/files/pbc_280385485/${billboard.id}/${billboard.image}`}
                alt={billboard.name}/>
             )}
 
