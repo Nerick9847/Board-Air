@@ -72,11 +72,17 @@ const billboardFormSchema = z.object({
    latitude: z.coerce.number({
       required_error: "Latitude is required",
       invalid_type_error: "Latitude must be a number",
-   }),
+   })
+   .min(-90, { message: "Latitude must be between -90 and 90" })
+   .max(90, { message: "Latitude must be between -90 and 90" })
+   .refine(val => val !== 0, { message: "Latitude cannot be zero" }),
    longitude: z.coerce.number({
       required_error: "Longitude is required",
       invalid_type_error: "Longitude must be a number",
-   }),
+   })
+   .min(-180, { message: "Longitude must be between -180 and 180" })
+   .max(180, { message: "Longitude must be between -180 and 180" })
+   .refine(val => val !== 0, { message: "Longitude cannot be zero" }),
    price_per_month: z.coerce.number({
       required_error: "Price is required",
       invalid_type_error: "Price must be a number",
@@ -85,7 +91,9 @@ const billboardFormSchema = z.object({
       required_error: "Status is required",
    }),
    description: z.string().optional(),
-   size: z.string().min(1, { message: "Size is required" }),
+   size: z.string()
+     .min(1, { message: "Size is required" })
+     .regex(/^\d+ft x \d+ft$/, { message: "Size must be in the format '_ft x _ft'" }),
 });
 
 type BillboardFormValues = z.infer<typeof billboardFormSchema>;

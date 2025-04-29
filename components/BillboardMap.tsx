@@ -51,7 +51,7 @@ const fetchBillboardsData = async () => {
       
       const data = await response.json();
       
-      // Transform the records to match our Billboard interface
+      // Transform the records to match the Billboard interface
       return data.items.map(record => ({
          id: record.id,
          name: record.name,
@@ -231,7 +231,7 @@ const BillboardMap = () => {
                                        <p className="text-sm text-gray-600">{billboard.description}</p>
                                     )}
                                  </div>
-                                 <Link href={`/billboards/${billboard.id}`}>
+                                 <Link href={`/service/details?id=${billboard.id}`}>
                                     <Button className="w-full">
                                        View Details
                                     </Button>

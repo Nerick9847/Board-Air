@@ -1,5 +1,3 @@
-
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { signIn, signOut } from "next-auth/react";
 import { registerUser } from "@/lib/pocketbase";

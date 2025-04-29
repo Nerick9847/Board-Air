@@ -15,7 +15,8 @@ import {
   Phone, 
   ExternalLink,
   X as XIcon,
-  MapPin
+  MapPin,
+  Search
 } from "lucide-react";
 import PocketBase from 'pocketbase';
 
@@ -24,6 +25,9 @@ const pb = new PocketBase(process.env.NEXT_PUBLIC_POCKETBASE_URL || 'http://127.
 
 export default function MyBookings() {
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
   const { data: session } = useSession();
   const currentUserId = session?.user?.id || "";
   
@@ -96,6 +100,29 @@ export default function MyBookings() {
     setSelectedMedia(null);
   };
 
+  // Filter bookings based on search term and date range
+  const filteredBookings = bookings?.filter(booking => {
+    // Search term filter
+    const matchesSearch = booking.expand?.billboard_id?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         booking.brand?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Date range filter
+    const bookingDate = new Date(booking.created);
+    const startFilterDate = startDateFilter ? new Date(startDateFilter) : null;
+    const endFilterDate = endDateFilter ? new Date(endDateFilter) : null;
+    
+    let matchesDate = true;
+    if (startFilterDate && endFilterDate) {
+      matchesDate = bookingDate >= startFilterDate && bookingDate <= endFilterDate;
+    } else if (startFilterDate) {
+      matchesDate = bookingDate >= startFilterDate;
+    } else if (endFilterDate) {
+      matchesDate = bookingDate <= endFilterDate;
+    }
+    
+    return matchesSearch && matchesDate;
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -150,9 +177,51 @@ export default function MyBookings() {
             </div>
           </div>
 
+          {/* Search and Filter Section */}
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by billboard name or brand..."
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <label htmlFor="start-date" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                From:
+              </label>
+              <input
+                type="date"
+                id="start-date"
+                className="block w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                value={startDateFilter}
+                onChange={(e) => setStartDateFilter(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <label htmlFor="end-date" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                To:
+              </label>
+              <input
+                type="date"
+                id="end-date"
+                className="block w-full pl-3 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                value={endDateFilter}
+                onChange={(e) => setEndDateFilter(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className="grid gap-6">
-            {bookings && bookings.length > 0 ? (
-              bookings.map((booking) => {
+            {filteredBookings && filteredBookings.length > 0 ? (
+              filteredBookings.map((booking) => {
                 const status = calculateStatus(booking.start_date, booking.end_date);
                 
                 return (
@@ -285,7 +354,9 @@ export default function MyBookings() {
                   <div>
                     <p className="text-gray-500 mb-3">
                       {currentUserId 
-                        ? "You don't have any billboard bookings yet" 
+                        ? searchTerm || startDateFilter || endDateFilter
+                          ? "No bookings match your search criteria" 
+                          : "You don't have any billboard bookings yet" 
                         : "Please sign in to view your bookings"}
                     </p>
                     {currentUserId && (

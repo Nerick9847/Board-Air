@@ -1,4 +1,4 @@
-// hooks/useAdvertisement.ts
+
 import { useMutation } from "@tanstack/react-query";
 import { pb } from "@/lib/pocketbase"; // Make sure to configure your PocketBase client
 

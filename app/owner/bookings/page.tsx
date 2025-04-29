@@ -34,7 +34,7 @@ export default function Bookings() {
       if (!currentOwnerId) return [];
       
       try {
-        // First get all billboards owned by the current user
+        // Fetch all billboards owned by the current user
         const ownedBillboards = await pb.collection('billboards').getFullList({
           filter: `owner_id ~ "${currentOwnerId}"`
         });
@@ -66,7 +66,7 @@ export default function Bookings() {
         throw new Error("Failed to load bookings data");
       }
     },
-    enabled: !!currentOwnerId // Only run query when we have an owner ID
+    enabled: !!currentOwnerId 
   });
 
   const formatDate = (dateString) => {

@@ -5,10 +5,6 @@ export default function About() {
       <section className="container mx-auto py-16 px-4 ">
          <div className="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
             <div className="mb-8 lg:mb-0">
-               {/* <span className="block text-lg mb-4">
-                  Experience the Thrill, Embrace the Chill
-               </span> */}
-
                <h2 className="text-5xl lg:text-8xl uppercase font-bold mb-6  font-vanguard">
                   We Are <span className="text-[#de3636]">Board Air</span>
                </h2>

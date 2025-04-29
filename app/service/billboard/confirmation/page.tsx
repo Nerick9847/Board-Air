@@ -19,7 +19,7 @@ const Confirmation = () => {
         
         <div className="p-8 space-y-6">
           <p className="text-gray-700">
-            Thank you for your booking. We've sent a confirmation email with all the details.
+            Thank you for your booking. Lets air with BoardAIR.
           </p>
           
           <div className="grid gap-4 grid-cols-2 pt-4">
@@ -30,7 +30,7 @@ const Confirmation = () => {
               </Button>
             </Link>
             
-            <Link href="/dashboard" className="w-full">
+            <Link href="/advertiser/bookings" className="w-full">
               <Button className="w-full flex items-center justify-center py-5 bg-green-700 hover:bg-green-800 text-white">
                 <LayoutDashboard className="mr-2 h-4 w-4" />
                 Dashboard

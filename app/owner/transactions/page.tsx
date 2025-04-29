@@ -46,7 +46,7 @@ export default function Transactions() {
           return;
         }
         
-        // Create filter string for advertisements
+        // Filter string for advertisements
         let filterString = '';
         if (billboardIds.length === 1) {
           filterString = `billboard_id = "${billboardIds[0]}"`;
@@ -92,7 +92,7 @@ export default function Transactions() {
     const margin = 20;
     let yPosition = margin;
     
-    // Add logo or header
+    // Header
     doc.setFontSize(24);
     doc.setTextColor(44, 62, 80);
     doc.text("INVOICE", pageWidth / 2, yPosition, { align: "center" });

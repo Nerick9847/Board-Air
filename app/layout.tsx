@@ -4,6 +4,7 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 import QueryProvider from "@/components/providers/QueryProvider";
 import AuthProvider from "@/components/providers/AuthProvider";
+import { Toast } from "@radix-ui/react-toast";
 
 import Footer from '../components/Footer'
 const geistSans = Geist({
